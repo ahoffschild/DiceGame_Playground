@@ -14,7 +14,8 @@ public class DiceGameManager : MonoBehaviour
 
     public int rollCount = 0;
     public int score = 0;
-    public int rollsLeft = 2;
+    public int rollsLeft = 0;
+    private int rollsMax = 1;
 
     private void Awake()
     {
@@ -23,7 +24,7 @@ public class DiceGameManager : MonoBehaviour
             Instance = this;
             rollCount = 0;
             score = 0;
-            rollsLeft = 2;
+            rollsLeft = rollsMax;
         }
         else
         {
@@ -60,18 +61,19 @@ public class DiceGameManager : MonoBehaviour
         isRolling = false;
         GoalGUIManager.Instance.ReleaseButtons();
         rollCount += 1;
-        rollsLeft -= 1;
+        StatsGUI.Instance.UpdateStatsGUI();
     }
 
     void CheckRollsLeft()
     {
-        if(rollsLeft < 0)
+        rollsLeft -= 1;
+        if (rollsLeft < 0)
         {
             foreach (var d in KeepDiceButtons)
             {
                 d.ResetDice();
             }
-            rollsLeft = 2;
+            rollsLeft = rollsMax;
         }
     }
 }
