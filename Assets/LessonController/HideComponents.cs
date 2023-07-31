@@ -29,6 +29,8 @@ public class HideComponents : MonoBehaviour
                 component.hideFlags = HideFlags.None;
             }
         }
+
+
         foreach (var g in gameObjectsToHide)
         {
             if (willGameObjectsBeHidden)

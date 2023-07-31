@@ -21,6 +21,9 @@ public class DiceGameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            rollCount = 0;
+            score = 0;
+            rollsLeft = 2;
         }
         else
         {
