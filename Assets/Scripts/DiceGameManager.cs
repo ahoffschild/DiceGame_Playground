@@ -17,6 +17,8 @@ public class DiceGameManager : MonoBehaviour
     public int rollsLeft = 0;
     private int rollsMax = 1;
 
+    // new variables from dice
+
     private void Awake()
     {
         if (Instance == null)

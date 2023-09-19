@@ -23,4 +23,9 @@ public class ClaimButton : MonoBehaviour
         buttonText.text = "Claimed";
         thisClaimButton.interactable = false;
     }
+
+    public void EvaluateDice()
+    {
+        //Get list of dice, run through my listed evaluation logic
+    }
 }
