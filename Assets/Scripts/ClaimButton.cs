@@ -30,9 +30,23 @@ public class ClaimButton : MonoBehaviour
         m_goalClaimed = true;
         buttonText.text = "Claimed";
         thisClaimButton.interactable = false;
+
+        SaveTurnClaims();
     }
 
-    //Disable method? Behaves like claim, but only blocks Claim and has alternate text. Allows claim to be used for... claiming the combo
+    //method to write the claim
+    public void SaveTurnClaims()
+    {
+        Debug.Log((int)holdingCombo);
+        if (gameManager.currentControl == Controller.Player)
+        {
+            gameManager.playerCombos[(int)holdingCombo - 2] = 1;
+        }
+        else
+        {
+            gameManager.aiCombos[(int)holdingCombo - 2] = 1;
+        }
+    }
 
     public void Unclaim()
     {
@@ -41,17 +55,29 @@ public class ClaimButton : MonoBehaviour
         thisClaimButton.interactable = true;
     }
 
+    //Disable method? Behaves like claim, but only blocks Claim and has alternate text. Allows claim to be used for... claiming the combo
+
+    public void Activate()
+    {
+        m_goalClaimed = false;
+        thisClaimButton.interactable = true;
+    }
+    public void Deactivate()
+    {
+        thisClaimButton.interactable = false;
+    }
+
     public void EvaluateDiceRoll()
     {
-        if (gameManager.foundCombos.Contains(holdingCombo))
+        if (gameManager.foundCombos.Contains(holdingCombo) && !m_goalClaimed)
         {
             //Is one of the detected combos this chosen button's combo? If yes (and it's not claimed), make sure it's activated
-            Unclaim();
+            Activate();
         }
         else
         {
             //Ensure that when rerolling from the first roll that any potentially lost combos will be flagged unavailable again.
-            Claim();
+            Deactivate();
         }
     }
 

@@ -1,19 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DieLock : MonoBehaviour
 {
     private int lockState;
     private Dice parentDice;
-    SpriteRenderer spriteRenderer;
+    Image imageRender;
     [SerializeField] Sprite[] DiceSprites;
 
     private void Awake()
     {
         lockState = 0;
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        parentDice = transform.parent.GetComponent<Dice>();
+        imageRender = GetComponent<Image>();
+        parentDice = transform.parent.parent.GetComponent<Dice>();
     }
 
     public void ChangeLock()
@@ -26,12 +27,13 @@ public class DieLock : MonoBehaviour
 
         if (lockState == 0)
         {
-            spriteRenderer.color = Color.black;
+            imageRender.color = Color.black;
         }
         else
         {
-            spriteRenderer.color = Color.white;
-            spriteRenderer.sprite = DiceSprites[lockState - 1];
+            imageRender.color = Color.grey;
+            imageRender.sprite = DiceSprites[lockState - 1];
+            parentDice.dieLock = lockState;
         }
 
         parentDice.dieLock = lockState;

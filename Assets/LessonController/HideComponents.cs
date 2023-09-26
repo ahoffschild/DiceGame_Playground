@@ -17,7 +17,7 @@ public class HideComponents : MonoBehaviour
         gameObject.hideFlags |= HideFlags.HideInInspector;
 
         //  Uncomment this line to show the LessonController.
-        //gameObject.hideFlags = HideFlags.None;
+        gameObject.hideFlags = HideFlags.None;
         foreach (var component in componentsToHide)
         {
             if (willComponenetsBeHidden)

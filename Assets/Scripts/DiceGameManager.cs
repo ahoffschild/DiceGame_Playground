@@ -62,6 +62,9 @@ public class DiceGameManager : MonoBehaviour
             rollsLeft = rollsMax;
 
             currentControl = Controller.Player;
+
+            playerCombos = new int[6];
+            aiCombos = new int[6];
         }
         else
         {
@@ -104,6 +107,20 @@ public class DiceGameManager : MonoBehaviour
         GoalGUIManager.Instance.EvaluateButtonsRoll();
         rollCount += 1;
         StatsGUI.Instance.UpdateStatsGUI();
+    }
+
+    public void SwapControl()
+    {
+        if (currentControl == Controller.Player)
+        {
+            currentControl = Controller.Computer;
+            GoalGUIManager.Instance.EvaluateButtonsControl();
+        }
+        else
+        {
+            currentControl = Controller.Player;
+            GoalGUIManager.Instance.EvaluateButtonsControl();
+        }
     }
 
     void EvaluateCombos()

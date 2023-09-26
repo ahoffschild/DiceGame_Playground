@@ -23,6 +23,7 @@ public class Dice : MonoBehaviour
     {
         //If dice is locked to a particular value, it is set to that value unconditionally
         int newValue;
+        Debug.Log(dieLock);
         if (dieLock != 0)
         {
             newValue = dieLock;
