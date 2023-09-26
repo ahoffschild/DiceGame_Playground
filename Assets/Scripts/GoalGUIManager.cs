@@ -29,6 +29,8 @@ public class GoalGUIManager : MonoBehaviour
             button.GetComponent<Button>().interactable = false;
         }
     }
+
+    //Outdated method?
     public void ReleaseButtons()
     {
         foreach (ClaimButton button in goalButtons)
@@ -45,34 +47,23 @@ public class GoalGUIManager : MonoBehaviour
     /// Create logic in each section that prevents you from claiming the combination before it's valid.  
     /// 
 
-    public void TryClaimingThreeOfAKind()
+    // method invoked after each roll to verify combos
+    public void EvaluateButtonsRoll()
     {
-        goalButtons[0].Claim();
+        foreach (ClaimButton button in goalButtons)
+        {
+            button.EvaluateDiceRoll();
+        }
     }
 
-    public void TryClaimingFourOfAKind()
+    // method invoked after control switches from player to AI or vice versa
+    public void EvaluateButtonsControl()
     {
-        goalButtons[1].Claim();
+        foreach (ClaimButton button in goalButtons)
+        {
+            button.EvaluateDiceTurn();
+        }
     }
 
-    public void TryClaimingSmallStraight()
-    {
-        goalButtons[2].Claim();
-    }
-
-    public void TryClaimingLargeStraight()
-    {
-        goalButtons[3].Claim();
-    }
-
-    public void TryClaimingTwoPairs()
-    {
-        goalButtons[4].Claim();
-    }
-
-    public void TryClaimingFullHouse()
-    {
-        goalButtons[5].Claim();
-    }
     #endregion
 }
