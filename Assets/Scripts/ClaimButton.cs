@@ -17,7 +17,7 @@ public class ClaimButton : MonoBehaviour
 
     // new variables
 
-    [SerializeField] RollCombos holdingCombo;
+    public RollCombos holdingCombo;
 
     private void Awake()
     {
@@ -31,13 +31,15 @@ public class ClaimButton : MonoBehaviour
         buttonText.text = "Claimed";
         thisClaimButton.interactable = false;
 
+        gameManager.ClaimTurnEnd();
+
         SaveTurnClaims();
     }
 
     //method to write the claim
     public void SaveTurnClaims()
     {
-        Debug.Log((int)holdingCombo);
+        //Debug.Log((int)holdingCombo);
         if (gameManager.currentControl == Controller.Player)
         {
             gameManager.playerCombos[(int)holdingCombo - 2] = 1;

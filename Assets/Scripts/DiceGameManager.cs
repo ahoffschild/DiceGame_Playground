@@ -7,8 +7,9 @@ public class DiceGameManager : MonoBehaviour
 {
     public Dice[] Dicelist;
     public DiceButton[] KeepDiceButtons;
+    public Button swapButton;
     
-    public bool isRolling;
+    public bool isRolling, turnClaimed;
 
     public static DiceGameManager Instance;
 
@@ -74,10 +75,18 @@ public class DiceGameManager : MonoBehaviour
 
     public void Roll()
     {
+        if (rollCount == rollsMax)
+        {
+            turnClaimed = false;
+        }
+
         if (!isRolling)
         {
             diceFaces = new int[6];
+            swapButton.interactable = false;
             StartCoroutine(RollAllDice());
+
+            //Locks out swap control while rolling.
         }
     }
 
@@ -107,6 +116,20 @@ public class DiceGameManager : MonoBehaviour
         GoalGUIManager.Instance.EvaluateButtonsRoll();
         rollCount += 1;
         StatsGUI.Instance.UpdateStatsGUI();
+
+        if (rollsLeft == 0 && !swapButton.interactable)
+        {
+            swapButton.interactable = true;
+        }
+    }
+
+    public void ClaimTurnEnd ()
+    {
+        turnClaimed = true;
+        GoalGUIManager.Instance.ProtectButtons();
+        rollsLeft = 0;
+        swapButton.interactable = true;
+        StatsGUI.Instance.UpdateStatsGUI();
     }
 
     public void SwapControl()
@@ -115,11 +138,16 @@ public class DiceGameManager : MonoBehaviour
         {
             currentControl = Controller.Computer;
             GoalGUIManager.Instance.EvaluateButtonsControl();
+            AIManager.Instance.AITurnStart();
+            GoalGUIManager.Instance.ProtectButtons();
+            //Protect buttons here.
         }
         else
         {
             currentControl = Controller.Player;
             GoalGUIManager.Instance.EvaluateButtonsControl();
+            GoalGUIManager.Instance.ProtectButtons();
+            //Protect buttons here.
         }
     }
 
@@ -208,7 +236,7 @@ public class DiceGameManager : MonoBehaviour
                 }
                 // If amountCounted is 5, it can only be LargeStraight. Second condition prevents it from potentially looping
 
-                Debug.Log($"broken at: {brokenStreak}, i: {i}");
+                //Debug.Log($"broken at: {brokenStreak}, i: {i}");
                 if (amountCounted > 4)
                 {
                     foundCombos.Add(RollCombos.LargeStraight);
@@ -235,7 +263,7 @@ public class DiceGameManager : MonoBehaviour
 
         foreach (RollCombos combos in foundCombos)
         {
-            Debug.Log(combos.ToString());
+            //Debug.Log(combos.ToString());
         }
     }
 

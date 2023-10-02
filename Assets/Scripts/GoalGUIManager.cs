@@ -7,7 +7,8 @@ public class GoalGUIManager : MonoBehaviour
 {
     
     [SerializeField]
-    ClaimButton[] goalButtons;
+    public ClaimButton[] goalButtons;
+
     public static GoalGUIManager Instance;
 
     private void Awake()
