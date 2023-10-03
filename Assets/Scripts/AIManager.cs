@@ -13,6 +13,7 @@ public class AIManager : MonoBehaviour
 
     public static AIManager Instance;
     public Button continueButton;
+    private RollCombos holdingCombo;
 
     //Utilized so the AI knows what it's doing
 
@@ -25,6 +26,7 @@ public class AIManager : MonoBehaviour
         RollOrEnd,
         Pause
     }
+    
     private AIStates state;
 
     // AI is disabled at startup, set it as instance
@@ -35,6 +37,7 @@ public class AIManager : MonoBehaviour
         {
             Instance = this;
             aiActive = false;
+            saveRolls = new List<int>();
         }
         else
         {
@@ -62,12 +65,15 @@ public class AIManager : MonoBehaviour
         }
     }
 
-    IEnumerator SelectKeeps()
+    IEnumerator SelectKeeps()   
     {
         savingKeeps = true;
-        for (int i = 0; i < gameManager.KeepDiceButtons.Length; i++)
+        for (int i = 0; i < gameManager.Dicelist.Length; i++)
         {
-            gameManager.KeepDiceButtons[i].ToggleDice();
+            if (saveRolls.Contains(i))
+            {
+                gameManager.KeepDiceButtons[i].ToggleDice();
+            }
             yield return new WaitForSeconds(0.125f);
         }
         savingKeeps = false;
@@ -80,29 +86,90 @@ public class AIManager : MonoBehaviour
 
         saveRolls.Clear();
 
-        //Saves any roll that cannot safely or meaningfully reroll
-        if (gameManager.foundCombos.Contains(RollCombos.FullHouse) && gameManager.aiCombos[(int)RollCombos.FullHouse - 2] != 1)
+        Debug.Log(gameManager.lookFor);
+
+        //Logic for saving runs
+        if (gameManager.lookFor != 0 && gameManager.aiCombos[(int)RollCombos.SmallStraight - 2] == 0 || gameManager.aiCombos[(int)RollCombos.LargeStraight - 2] == 0)
         {
-            for (int i = 0; i < diceList.Length; i++)
+            bool foundNumber;
+            for (int i = gameManager.lookFor; i < 1 + 4 && i < 6; i++)
             {
-                saveRolls.Add(i);
+                foundNumber = false;
+                for (int j = 0; j < diceList.Length; j++)
+                {
+                    if (diceList[j].m_dieValue == i && foundNumber == false)
+                    {
+                        saveRolls.Add(j);
+                        foundNumber = true;
+                    }
+                }
             }
         }
 
-        if (gameManager.foundCombos.Contains(RollCombos.FourKind) && gameManager.aiCombos[(int)RollCombos.FourKind - 2] != 1)
+        //Logic for saving twoPair/fullHouse
+        if (saveRolls.Count < 1 && gameManager.aiCombos[(int)RollCombos.FullHouse - 2] == 0 || gameManager.aiCombos[(int)RollCombos.TwoPair - 2] == 0)
         {
+            bool savedSingle = false;
+            int saveTarget = 2;
+            // AI will only look for groups of 3 when looking for full house, not Two Pair.
+            if (gameManager.aiCombos[(int)RollCombos.FullHouse - 2] == 0 && gameManager.foundCombos.Contains(RollCombos.Pair) || gameManager.foundCombos.Contains(RollCombos.ThreeKind))
+            {
+                saveTarget = 3;
+            }
             for (int i = 0; i < diceList.Length; i++)
             {
-                saveRolls.Add(i);
+                int saves = 0;
+                if (diceFaces[i] > 1)
+                {
+                    for (int j = 0; j < diceList.Length && saves < saveTarget; j++)
+                    {
+                        if (diceList[j].m_dieValue == i + 1)
+                        {
+                            saveRolls.Add(j);
+                            saves++;
+                        }
+                    }
+                }
+            }
+            if (saveRolls.Count < saveTarget + 1)
+            {
+                for (int i = 0;i < diceList.Length && !savedSingle; i++)
+                {
+                    if (!saveRolls.Contains(i))
+                    {
+                        saveRolls.Add(i);
+                        savedSingle = true;
+                    }
+                }
+            }
+            
+        }
+
+        //Logic for saving 4/3
+
+        if (saveRolls.Count < 1)
+        {
+            if (gameManager.foundCombos.Contains(RollCombos.Pair) || gameManager.foundCombos.Contains(RollCombos.ThreeKind))
+            {
+                for (int i = 0; i < diceFaces.Length; i++)
+                {
+                    if (diceFaces[i] > 1)
+                    {
+                        for (int j = 0; j < diceList.Length; j++)
+                        {
+                            if (diceList[j].m_dieValue == i + 1)
+                            {
+                                saveRolls.Add(j);
+                            }
+                        }
+                    }
+                }
             }
         }
 
-        if (gameManager.foundCombos.Contains(RollCombos.LargeStraight) && gameManager.aiCombos[(int)RollCombos.LargeStraight - 2] != 1)
+        if (saveRolls.Count < 1)
         {
-            for (int i = 0; i < diceList.Length; i++)
-            {
-                saveRolls.Add(i);
-            }
+            saveRolls.Add(0);
         }
     }
 
@@ -129,22 +196,34 @@ public class AIManager : MonoBehaviour
 
                 case AIStates.SelectCombos:
                     // Combos if seen will be flagged by AI here
-                    Debug.Log("--");
+
+                    /*Debug.Log("--");
                     Debug.Log(gameManager.aiCombos[0]);
                     Debug.Log(gameManager.aiCombos[1]);
                     Debug.Log(gameManager.aiCombos[2]);
                     Debug.Log(gameManager.aiCombos[3]);
                     Debug.Log(gameManager.aiCombos[4]);
-                    Debug.Log(gameManager.aiCombos[5]);
+                    Debug.Log(gameManager.aiCombos[5]);*/
 
                     //Add the array of ClaimButtons here and set any where their heldCombo == combo to claimed. Starts from top to bottom to prioritize high value combos
                     for (int i = GoalGUIManager.Instance.goalButtons.Length - 1; i >= 0 && !gameManager.turnClaimed; i--)
                     {
-                        var holdingCombo = GoalGUIManager.Instance.goalButtons[i].holdingCombo;
+                        holdingCombo = GoalGUIManager.Instance.goalButtons[i].holdingCombo;
 
                         if (gameManager.foundCombos.Contains(holdingCombo) && gameManager.aiCombos[(int)holdingCombo - 2] != 1)
                         {
-                            GoalGUIManager.Instance.goalButtons[i].Claim();
+                            if (gameManager.rollsLeft > 0 && holdingCombo == RollCombos.ThreeKind && gameManager.aiCombos[(int)RollCombos.FourKind - 2] == 0)
+                            {
+                                //Looking for four of a kind branch
+                            }
+                            else
+                            {
+                                GoalGUIManager.Instance.goalButtons[i].Claim();
+                            }
+                        }
+                        else
+                        {
+                            //Debug.Log("loop runs, if fails");
                         }
                     }
 
@@ -156,6 +235,8 @@ public class AIManager : MonoBehaviour
 
                     if (gameManager.rollsLeft > 0)
                     {
+                        AIEvaluation();
+                        Debug.Log(saveRolls);
                         StartCoroutine(SelectKeeps());
                     }
 

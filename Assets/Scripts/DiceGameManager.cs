@@ -16,6 +16,7 @@ public class DiceGameManager : MonoBehaviour
     public int rollCount = 0;
     public int score = 0;
     public int rollsLeft = 0;
+    public int lookFor;
     private int rollsMax = 1;
 
     // new variables for AI project
@@ -60,7 +61,7 @@ public class DiceGameManager : MonoBehaviour
             Instance = this;
             rollCount = 0;
             score = 0;
-            rollsLeft = rollsMax;
+            rollsLeft = 0;
 
             currentControl = Controller.Player;
 
@@ -75,7 +76,7 @@ public class DiceGameManager : MonoBehaviour
 
     public void Roll()
     {
-        if (rollCount == rollsMax)
+        if (rollsLeft == 0)
         {
             turnClaimed = false;
         }
@@ -149,10 +150,12 @@ public class DiceGameManager : MonoBehaviour
             GoalGUIManager.Instance.ProtectButtons();
             //Protect buttons here.
         }
+        turnClaimed = false;
     }
 
     void EvaluateCombos()
     {
+        lookFor = 0;
         //Insert combo logic here. If a combo is found, add it to the saved list.
 
         //Clear dicefaces, then saving how much of each face is present for future usage.
@@ -180,6 +183,10 @@ public class DiceGameManager : MonoBehaviour
             if (diceFaces[i] > 2)
             {
                 foundCombos.Add(RollCombos.ThreeKind);
+            }
+            if (diceFaces[i] > 1)
+            {
+                foundCombos.Add(RollCombos.Pair);
             }
 
             //Add threekind and pairs found to the pairCombos which well then be checked
@@ -213,7 +220,7 @@ public class DiceGameManager : MonoBehaviour
 
         //Straight processing
 
-        if (foundCombos.Count == 0)
+        if (foundCombos.Count == 0 || foundCombos.Count == 1 && foundCombos.Contains(RollCombos.Pair))
         {
             int amountCounted, brokenStreak;
             for (int i = 1; i <= 3; i++)
@@ -251,12 +258,14 @@ public class DiceGameManager : MonoBehaviour
                     else
                     {
                         //lookFor will go here
+                        lookFor = i;
                     }
                 }
                 // add lookFor == 0 to this if branch once implemented
-                if (amountCounted == 3)
+                if (amountCounted == 3 && lookFor == 0)
                 {
                     //lookFor will also go here.
+                    lookFor = i;
                 }
             }
         }
