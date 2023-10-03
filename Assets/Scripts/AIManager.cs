@@ -94,6 +94,7 @@ public class AIManager : MonoBehaviour
         //Logic for saving runs
         if (gameManager.lookFor != 0 && gameManager.aiCombos[(int)RollCombos.SmallStraight - 2] == 0 || gameManager.lookFor != 0 && gameManager.aiCombos[(int)RollCombos.LargeStraight - 2] == 0)
         {
+            Debug.Log("Runs");
             bool foundNumber;
             for (int i = gameManager.lookFor; i <= i + 4 && i <= 6; i++)
             {
@@ -113,13 +114,11 @@ public class AIManager : MonoBehaviour
         //Logic for saving twoPair/fullHouse
         if (saveRolls.Count < 1 && gameManager.aiCombos[(int)RollCombos.FullHouse - 2] == 0 || saveRolls.Count < 1 && gameManager.aiCombos[(int)RollCombos.TwoPair - 2] == 0)
         {
+            //Setup savedsingle to determine if we've saved a spare dice yet, setup saveTarget as changeable shorthand for what "size" it's looking for at maximum
             bool savedSingle = false;
-            int saveTarget = 2;
-            // AI will only look for groups of 3 when looking for full house, not Two Pair.
-            if (gameManager.aiCombos[(int)RollCombos.FullHouse - 2] == 0 && gameManager.foundCombos.Contains(RollCombos.Pair) || gameManager.foundCombos.Contains(RollCombos.ThreeKind))
-            {
-                saveTarget = 3;
-            }
+            int saveTarget = 3;
+            Debug.Log("TwoPair/FullHouse");
+
             for (int i = 0; i < diceList.Length; i++)
             {
                 int saves = 0;
@@ -162,19 +161,26 @@ public class AIManager : MonoBehaviour
 
         if (saveRolls.Count < 1 && gameManager.aiCombos[(int)RollCombos.ThreeKind - 2] == 0 || saveRolls.Count < 1 && gameManager.aiCombos[(int)RollCombos.FourKind - 2] == 0)
         {
+            int groupMax = 0;
+            int biggestGroup = 0;
+            Debug.Log("4/3");
             if (gameManager.foundCombos.Contains(RollCombos.Pair) || gameManager.foundCombos.Contains(RollCombos.ThreeKind))
             {
                 for (int i = 0; i < diceFaces.Length; i++)
                 {
                     if (diceFaces[i] > 1)
                     {
-                        for (int j = 0; j < diceList.Length; j++)
+                        if (diceFaces[i] > groupMax)
                         {
-                            if (diceList[j].m_dieValue == i + 1)
-                            {
-                                saveRolls.Add(j);
-                            }
+                            biggestGroup = i;
                         }
+                    }
+                }
+                for (int i = 0; i < diceList.Length; i++)
+                {
+                    if (diceList[i].m_dieValue == biggestGroup)
+                    {
+                        saveRolls.Add(i);
                     }
                 }
             }
