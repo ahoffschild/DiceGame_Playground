@@ -15,6 +15,9 @@ public class AIManager : MonoBehaviour
     public Button continueButton;
     private RollCombos holdingCombo;
 
+    public int maxCounter;
+    private int waitCounter;
+
     //Utilized so the AI knows what it's doing
 
     private enum AIStates
@@ -86,13 +89,13 @@ public class AIManager : MonoBehaviour
 
         saveRolls.Clear();
 
-        Debug.Log(gameManager.lookFor);
+        //Debug.Log(gameManager.lookFor);
 
         //Logic for saving runs
-        if (gameManager.lookFor != 0 && gameManager.aiCombos[(int)RollCombos.SmallStraight - 2] == 0 || gameManager.aiCombos[(int)RollCombos.LargeStraight - 2] == 0)
+        if (gameManager.lookFor != 0 && gameManager.aiCombos[(int)RollCombos.SmallStraight - 2] == 0 || gameManager.lookFor != 0 && gameManager.aiCombos[(int)RollCombos.LargeStraight - 2] == 0)
         {
             bool foundNumber;
-            for (int i = gameManager.lookFor; i < 1 + 4 && i < 6; i++)
+            for (int i = gameManager.lookFor; i <= i + 4 && i <= 6; i++)
             {
                 foundNumber = false;
                 for (int j = 0; j < diceList.Length; j++)
@@ -100,6 +103,7 @@ public class AIManager : MonoBehaviour
                     if (diceList[j].m_dieValue == i && foundNumber == false)
                     {
                         saveRolls.Add(j);
+                        Debug.Log($"Keeping dice {j}");
                         foundNumber = true;
                     }
                 }
@@ -107,7 +111,7 @@ public class AIManager : MonoBehaviour
         }
 
         //Logic for saving twoPair/fullHouse
-        if (saveRolls.Count < 1 && gameManager.aiCombos[(int)RollCombos.FullHouse - 2] == 0 || gameManager.aiCombos[(int)RollCombos.TwoPair - 2] == 0)
+        if (saveRolls.Count < 1 && gameManager.aiCombos[(int)RollCombos.FullHouse - 2] == 0 || saveRolls.Count < 1 && gameManager.aiCombos[(int)RollCombos.TwoPair - 2] == 0)
         {
             bool savedSingle = false;
             int saveTarget = 2;
@@ -135,10 +139,19 @@ public class AIManager : MonoBehaviour
             {
                 for (int i = 0;i < diceList.Length && !savedSingle; i++)
                 {
+                    //Prevent it from selecting a singular dice that is already on the list, or shares a face with the existing dice.
                     if (!saveRolls.Contains(i))
                     {
-                        saveRolls.Add(i);
-                        savedSingle = true;
+                        if (saveRolls.Count == 0)
+                        {
+                            saveRolls.Add(i);
+                            savedSingle = true;
+                        }
+                        else if (diceList[i].m_dieValue != diceList[saveRolls[0]].m_dieValue)
+                        {
+                            saveRolls.Add(i);
+                            savedSingle = true;
+                        }
                     }
                 }
             }
@@ -147,7 +160,7 @@ public class AIManager : MonoBehaviour
 
         //Logic for saving 4/3
 
-        if (saveRolls.Count < 1)
+        if (saveRolls.Count < 1 && gameManager.aiCombos[(int)RollCombos.ThreeKind - 2] == 0 || saveRolls.Count < 1 && gameManager.aiCombos[(int)RollCombos.FourKind - 2] == 0)
         {
             if (gameManager.foundCombos.Contains(RollCombos.Pair) || gameManager.foundCombos.Contains(RollCombos.ThreeKind))
             {
@@ -212,14 +225,24 @@ public class AIManager : MonoBehaviour
 
                         if (gameManager.foundCombos.Contains(holdingCombo) && gameManager.aiCombos[(int)holdingCombo - 2] != 1)
                         {
+                            //Branch to delay claim if they have a better option
                             if (gameManager.rollsLeft > 0 && holdingCombo == RollCombos.ThreeKind && gameManager.aiCombos[(int)RollCombos.FourKind - 2] == 0)
                             {
-                                //Looking for four of a kind branch
+                                //Four of a kind branch
+                            }
+                            else if (gameManager.rollsLeft > 0 && holdingCombo == RollCombos.TwoPair && gameManager.aiCombos[(int)RollCombos.FullHouse - 2] == 0)
+                            {
+                                //Full House branch
+                            }
+                            else if (gameManager.rollsLeft > 0 && holdingCombo == RollCombos.SmallStraight && gameManager.aiCombos[(int)RollCombos.LargeStraight - 2] == 0)
+                            {
+                                //Large Straight branch
                             }
                             else
                             {
                                 GoalGUIManager.Instance.goalButtons[i].Claim();
                             }
+
                         }
                         else
                         {
@@ -236,10 +259,10 @@ public class AIManager : MonoBehaviour
                     if (gameManager.rollsLeft > 0)
                     {
                         AIEvaluation();
-                        Debug.Log(saveRolls);
                         StartCoroutine(SelectKeeps());
                     }
 
+                    waitCounter = 0;
                     state = AIStates.RollOrEnd;
 
                     break;
@@ -251,7 +274,14 @@ public class AIManager : MonoBehaviour
                     {
                         if (!savingKeeps)
                         {
-                            state = AIStates.InitialRoll;
+                            if (waitCounter >= maxCounter)
+                            {
+                                state = AIStates.InitialRoll;
+                            }
+                            else
+                            {
+                                waitCounter++;
+                            }
                         }
                     }
                     else

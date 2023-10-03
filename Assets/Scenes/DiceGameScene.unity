@@ -4269,9 +4269,11 @@ MonoBehaviour:
   - {fileID: 1296324475}
   swapButton: {fileID: 1199879421}
   isRolling: 0
+  turnClaimed: 0
   rollCount: 0
   score: 0
   rollsLeft: 0
+  lookFor: 0
   currentControl: 0
   foundCombos: 
   diceFaces: 
@@ -7900,6 +7902,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   continueButton: {fileID: 1004429111}
+  maxCounter: 100
 --- !u!4 &1972879685
 Transform:
   m_ObjectHideFlags: 0
