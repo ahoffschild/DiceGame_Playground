@@ -207,15 +207,12 @@ public class DiceGameManager : MonoBehaviour
         //checking pairCombos
         if (pairCombos[1] != 0)
         {
-            //If threekind is present, it must be a full house. Otherwise, two pair.
+            //If threekind is present, it must be a full house
             if (pairCombos[0] == RollCombos.ThreeKind || pairCombos[1] == RollCombos.ThreeKind)
             {
                 foundCombos.Add(RollCombos.FullHouse);
             }
-            else
-            {
-                foundCombos.Add(RollCombos.TwoPair);
-            }
+            foundCombos.Add(RollCombos.TwoPair);
         }
 
         //Straight processing

@@ -117,6 +117,10 @@ public class AIManager : MonoBehaviour
             //Setup savedsingle to determine if we've saved a spare dice yet, setup saveTarget as changeable shorthand for what "size" it's looking for at maximum
             bool savedSingle = false;
             int saveTarget = 3;
+            if (gameManager.aiCombos[(int)RollCombos.FullHouse - 2] == 1)
+            {
+                saveTarget = 2;
+            }
             Debug.Log("TwoPair/FullHouse");
 
             for (int i = 0; i < diceList.Length; i++)
@@ -168,13 +172,12 @@ public class AIManager : MonoBehaviour
             {
                 for (int i = 0; i < diceFaces.Length; i++)
                 {
-                    if (diceFaces[i] > 1)
+                    if (diceFaces[i] > groupMax)
                     {
-                        if (diceFaces[i] > groupMax)
-                        {
-                            biggestGroup = i;
-                        }
+                        biggestGroup = i + 1;
+                        groupMax = diceFaces[i];
                     }
+                    Debug.Log($"{i + 1} is equal to {diceFaces[i]}, groupMax is {groupMax}, biggestGroup is {biggestGroup}");
                 }
                 for (int i = 0; i < diceList.Length; i++)
                 {
